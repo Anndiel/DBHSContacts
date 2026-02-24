@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>High School Contact Manager</title>
+  <style>
+    body { font-family: Arial; background:#f4f7fb; padding:20px; }
+    h1 { color:#0d3b66; }
+    input { padding:10px; margin:5px; }
+    button { padding:10px; background:#0d3b66; color:white; border:none; }
+    li { margin:10px 0; padding:10px; background:white; border-radius:6px; }
+  </style>
+</head>
+<body>
+
+<h1>High School Contact Manager</h1>
+
+<input type="text" id="name" placeholder="Name">
+<input type="text" id="contact" placeholder="Contact Number">
+<button onclick="addContact()">Save</button>
+
+<ul id="list"></ul>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxrdEYDa-cmLfGqt3UjumP1AXWisveVNidHagzkF2ZSxgbU-aW4iw1lW7kzUT4cFe37nA/exec";
+
+function loadData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      data.slice(1).forEach(row => {
+        const li = document.createElement("li");
+        li.textContent = row[1] + " - " + row[2];
+        list.appendChild(li);
+      });
+    });
+}
+
+function addContact() {
+  const name = document.getElementById("name").value;
+  const contact = document.getElementById("contact").value;
+
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({ name, contact })
+  }).then(() => {
+    document.getElementById("name").value = "";
+    document.getElementById("contact").value = "";
+    loadData();
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
