@@ -1,85 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Classmate Manager</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef3fa;
-      margin: 0;
-    }
-    header {
-      background: #0d3b66;
-      color: white;
-      padding: 1.5rem;
-      text-align: center;
-    }
-    .container {
-      max-width: 700px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
-    input {
-      padding: 10px;
-      margin: 5px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      width: calc(100% - 24px);
-    }
-    button {
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 6px;
-      background: #0d3b66;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1d70b8;
-    }
-    .card {
-      padding: 10px;
-      margin: 10px 0;
-      background: #f9fbff;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .delete-btn {
-      background: red;
-      padding: 6px 10px;
-      font-size: 12px;
-    }
-  </style>
-</head>
-<body>
-
-<header>
-  <h1>High School Classmate Manager</h1>
-</header>
-
-<div class="container">
-
-  <input type="password" id="password" placeholder="Enter Admin Password">
-
-  <input type="text" id="search" placeholder="Search by name..." onkeyup="filterList()">
-
-  <input type="text" id="name" placeholder="Classmate Name">
-  <input type="text" id="contact" placeholder="Contact Number">
-  <button onclick="addContact()">Add Contact</button>
-
-  <div id="list"></div>
-
-</div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbz0kJHlVtS_ro0hB3WlqRNMWz1wfvJSIOhxOrl0tA9Gy64GxzHI5ooI42fRVor34xMvGA/exec";
+const ADMIN_PASSWORD = "Abdiel2026";
+
 let allData = [];
 
 function loadData() {
@@ -93,16 +15,24 @@ function loadData() {
 
 function renderList(data) {
   const list = document.getElementById("list");
+  const enteredPassword = document.getElementById("password").value;
+
   list.innerHTML = "";
+
   data.forEach(row => {
+    const showDetails = enteredPassword === ADMIN_PASSWORD;
+
     const div = document.createElement("div");
     div.className = "card";
     div.innerHTML = `
       <div>
         <strong>${row[1]}</strong><br>
-        ${row[2]}
+        ${showDetails ? row[2] : "🔒 Contact Hidden"}<br>
+        ${showDetails ? row[3] : "🔒 Address Hidden"}
       </div>
-      <button class="delete-btn" onclick="deleteContact('${row[0]}')">Delete</button>
+      <button class="delete-btn" onclick="deleteContact('${row[0]}')">
+        Delete
+      </button>
     `;
     list.appendChild(div);
   });
@@ -119,12 +49,22 @@ function filterList() {
 function addContact() {
   const name = document.getElementById("name").value;
   const contact = document.getElementById("contact").value;
+  const address = document.getElementById("address").value;
   const password = document.getElementById("password").value;
 
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({ action:"add", name, contact, password })
+    body: JSON.stringify({ 
+      action:"add", 
+      name, 
+      contact, 
+      address,
+      password 
+    })
   }).then(() => {
+    document.getElementById("name").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("address").value = "";
     loadData();
   });
 }
@@ -134,14 +74,19 @@ function deleteContact(id) {
 
   fetch(API_URL, {
     method: "POST",
-    body: JSON.stringify({ action:"delete", id, password })
+    body: JSON.stringify({ 
+      action:"delete", 
+      id, 
+      password 
+    })
   }).then(() => {
     loadData();
   });
 }
 
+document.getElementById("password").addEventListener("input", () => {
+  renderList(allData);
+});
+
 loadData();
 </script>
-
-</body>
-</html>
